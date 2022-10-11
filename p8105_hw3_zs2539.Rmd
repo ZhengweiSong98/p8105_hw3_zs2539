@@ -1,0 +1,151 @@
+---
+title: "HW3"
+output: github_document
+---
+
+## Problem 1 Solution
+
+#### Importing data
+```{r}
+library(p8105.datasets)
+data("instacart")
+
+tail(instacart)
+```
+
+This dataset contains `r nrow(instacart)` rows and `r ncol(instacart)` variables. The variables include `r colnames(instacart)`. These variables record unique numeric identifiers like ID about user and product, and descriptive character observations about name and category.
+
+#### a.
+```{r}
+library(tidyverse)
+instacart %>%
+  count(aisle) %>%
+  arrange(desc(n))
+```
+
+There are `r length(unique(pull(instacart, aisle)))` aisles. _fresh vegetables_, _fresh fruits_ and _packaged vegetables fruits_ are the most items ordered from, all of which have more than **78000** observations.
+
+#### b.
+```{r}
+library(ggridges)
+instacart %>%
+  count(aisle) %>%
+  filter(n > 10000) %>%
+  ggplot(aes(x = aisle, y = n)) + geom_point() + theme(axis.text.x = element_text
+  (angle = 90)) +
+  labs(
+    title = "The number of items ordered in each aisle",
+    x = "Aisles",
+    y = "Items Ordered"
+  )
+```
+
+#### c.
+```{r}
+instacart %>% 
+    filter(aisle %in% c("baking ingredients", "dog food care", "packaged vegetables fruits")) %>% 
+    group_by(aisle) %>% 
+    count(product_name) %>% 
+    mutate(rank = min_rank(desc(n))) %>% 
+    filter(rank <= 3) %>% 
+    arrange(aisle, rank) %>% 
+    knitr::kable()
+```
+
+
+#### d.
+```{r}
+instacart %>% 
+  filter(product_name == "Pink Lady Apples" | product_name ==  "Coffee Ice Cream") %>%
+  group_by(product_name, order_dow) %>% 
+  summarize(
+   mean_hour = mean(order_hour_of_day)
+  ) %>% 
+   mutate(
+     order_dow = recode(order_dow, "0" = "Sun", "1" = "Mon", "2" = "Tue", "3" = "Wed", "4" = "Thu", "5" = "Fri", "6" = "Sat"),
+     mean_hour = round(mean_hour, 2)
+     ) %>% 
+    pivot_wider(
+    names_from = order_dow,
+    values_from = mean_hour
+  ) %>% 
+   knitr::kable()
+```
+
+## Problem 2 Solution
+
+```{r}
+
+```
+
+
+
+```{r}
+
+```
+
+
+
+```{r}
+
+```
+
+
+
+```{r}
+
+```
+
+
+
+```{r}
+
+```
+
+
+
+```{r}
+
+```
+
+
+
+```{r}
+
+```
+
+
+
+```{r}
+
+```
+
+
+
+```{r}
+
+```
+
+
+
+```{r}
+
+```
+
+
+
+```{r}
+
+```
+
+
+
+```{r}
+
+```
+
+
+
+```{r}
+
+```
