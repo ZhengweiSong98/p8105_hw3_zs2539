@@ -163,49 +163,83 @@ Conclusions:
 
 ## Problem 3 Solution
 
-#### a.
+#### Importing data
 ```{r}
-
+library(p8105.datasets)
+data("ny_noaa")
 ```
 
+There are `r nrow(ny_noaa)` observations and `r ncol(ny_noaa)` variables, including information about precipitation, snowfall, snow depth and temperature range by weather station ID and by date. Missing data is apparent in this dataset where `r sum(is.na(ny_noaa))` blanks missing, consisting of `r sum(is.na(ny_noaa$prcp))` in _precipitation_, `r sum(is.na(ny_noaa$snow))` in _snowfall_, `r sum(is.na(ny_noaa$snwd))` in _snow depth_, `r sum(is.na(ny_noaa$tmax))` in _tmax_, `r sum(is.na(ny_noaa$tmin))` in _tmin_.
 
-
+#### a. Cleaning Data
 ```{r}
+ny_precipitation = ny_noaa %>% 
+  janitor::clean_names() %>% 
+  separate(date, into = c("year", "month", "day"), sep = "-") %>% 
+  mutate(
+      month = as.numeric(month),
+      year = as.numeric(year),
+      
+      prcp = as.numeric(prcp),
+      tmax = as.numeric(tmax),
+      tmin = as.numeric(tmin),
+         
+      prcp = prcp / 10,
+      tmin = tmin / 10,
+      tmax = tmax / 10
+      )
 
+ny_precipitation %>% 
+  count(snow) %>% 
+  arrange(desc(n))
 ```
 
+The most commonly observed values is 0 for snowfall, which is reasonable that snowfall only occurs during cold seasons in New York.
 
-
+#### b. Create a two-panel plot showing the average max temperature in January and in July in each station across years
 ```{r}
-
+  ny_precipitation %>%
+  select(id, year, month, tmax) %>% 
+  filter(month ==  c(1,7)) %>% 
+  group_by(id, year, month) %>% 
+  mutate(
+    mean_tmax = mean(tmax, na.rm = T),
+    month = month.name[month]
+    ) %>% 
+    drop_na(mean_tmax) %>%
+  ggplot(aes(x = year, y = mean_tmax, color = month)) +
+  geom_point(size = .3, alpha = .5) +
+   geom_smooth(se = F) +
+  labs(
+    title = "Average maximum tempreture of weather stations between January and July in New York",
+    x = "Year",
+    y = "Average Monthly Tempreture (°C)") + 
+  theme(legend.position = "none")  +
+  facet_grid(~month) +
+  viridis::scale_color_viridis(discrete = T, option = "plasma") +
+    scale_color_manual(values=c("blue", "red"))
 ```
 
+In general, the range of maximum temperature is from -10 to 10 degrees Celsius in January, while from 22 to 32 in July. Also, in January, the maximum temperature fluctuates apparently compared with that in July. There is some apparent outliers such as one station extremely warmer on Jan. 2004, while one station extremely colder July 1988.
 
 
+#### c. (i) tmax - tmin plot for the full dataset
 ```{r}
-
+  ny_precipitation %>% 
+  ggplot(aes(x = tmin, y = tmax)) + 
+  geom_hex()
 ```
 
-
-
+#### c. (ii) plotting distribution of snowfall values 0-100 by year
 ```{r}
-
+ny_precipitation %>% 
+  filter(snow < 100 & snow > 0) %>%
+  mutate(year = factor(year)) %>%
+  ggplot(aes(x = year, y = snow)) + 
+  geom_violin(aes(fill = year)) +
+    stat_summary(fun = "median", color = "blue") +
+  theme(axis.text.x = element_text(angle = 90),
+        legend.position="none")
 ```
 
-
-
-```{r}
-
-```
-
-
-
-```{r}
-
-```
-
-
-
-```{r}
-
-```
+In general, min and max temperature have a positive correlation by hex plot. Also, their binary temperature ranges from -5 - 0 to 17 - 30 degrees Celsius. By the second violin plot, we can see the snowfall values do not vary apparently by year, and their mean snowfall are all approximately 25mm.
