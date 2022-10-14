@@ -31,6 +31,7 @@ library(ggridges)
 instacart %>%
   count(aisle) %>%
   filter(n > 10000) %>%
+    mutate(aisle = fct_reorder(aisle, n)) %>%
   ggplot(aes(x = aisle, y = n)) + geom_point() + theme(axis.text.x = element_text
   (angle = 90)) +
   labs(
@@ -116,7 +117,9 @@ knitr::kable(accel_day)
 ```{r}
 accel_day %>%
   group_by(day_id) %>%
-  ggplot(aes(x = day_id, y = day_counts, fill = day_id)) + geom_bar(stat = "identity", position = "dodge") + labs(
+  ggplot(aes(x = day_id, y = day_counts, fill = day_id)) + geom_bar(stat = "identity", position = "dodge") +
+    geom_smooth(se = F) + 
+    labs(
     title = "Accelerometer Daily Activity Counts",
     x = "Day No.",
     y = "Activity Counts"
@@ -141,7 +144,7 @@ Trends:
 
 By the one form and two plots above, some apparent trends are as follows.
 
-* On the last several days, activity counts tend to be lower than that in the beginning days.
+* Around day 25, activity counts tend to be lower than that around day 12.
 * Tuesday recorded the lowest activity counts, while Monday recorded the highest counts.
 
 #### c. Create a single-panel plot that shows the 24-hour activity time courses for each day
@@ -227,16 +230,17 @@ The most commonly observed values is 0 for snowfall, which is reasonable that sn
 In general, the range of maximum temperature is from -10 to 10 degrees Celsius in January, while from 22 to 32 in July. Also, in January, the maximum temperature fluctuates apparently compared with that in July. There is some apparent outliers such as one station extremely warmer on Jan. 2004, while one station extremely colder July 1988.
 
 
-#### c. (i) tmax - tmin plot for the full dataset
+#### c. (i) tmax - tmin plot for the full dataset; (ii) plotting distribution of snowfall values 0-100 by year
 ```{r}
-  ny_precipitation %>% 
+library(patchwork)
+
+tmax_tmin <- 
+    ny_precipitation %>% 
   ggplot(aes(x = tmin, y = tmax)) + 
   geom_hex()
-```
 
-#### c. (ii) plotting distribution of snowfall values 0-100 by year
-```{r}
-ny_precipitation %>% 
+snow_year <-
+    ny_precipitation %>% 
   filter(snow < 100 & snow > 0) %>%
   mutate(year = factor(year)) %>%
   ggplot(aes(x = year, y = snow)) + 
@@ -244,6 +248,8 @@ ny_precipitation %>%
     stat_summary(fun = "median", color = "blue") +
   theme(axis.text.x = element_text(angle = 90),
         legend.position="none")
+
+tmax_tmin / snow_year
 ```
 
-In general, min and max temperature have a positive correlation by hex plot. Also, their binary temperature ranges from -5 - 0 to 17 - 30 degrees Celsius. By the second violin plot, we can see the snowfall values do not vary apparently by year, and their mean snowfall are all approximately 25mm.
+In general, min and max temperature have a positive correlation by hex plot. Also, their binary temperature linearly ranges from (-5, 0) to (17, 30) degrees Celsius. By the second violin plot, we can see the snowfall values do not vary apparently by year, and their mean snowfall are all approximately 25mm.
