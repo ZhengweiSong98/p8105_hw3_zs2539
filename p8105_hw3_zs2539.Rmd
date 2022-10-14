@@ -237,7 +237,8 @@ library(patchwork)
 tmax_tmin <- 
     ny_precipitation %>% 
   ggplot(aes(x = tmin, y = tmax)) + 
-    geom_hex() + 
+    geom_hex(bins = 40) +
+    geom_smooth(se = F) +
     labs(
     title = "NY Max-Min temperature from 1981 to 2010",
     x = "tmin (°C)",
@@ -250,7 +251,7 @@ snow_year <-
   filter(snow < 100 & snow > 0) %>%
   mutate(year = factor(year)) %>%
   ggplot(aes(x = year, y = snow)) + 
-  geom_violin(aes(fill = year)) +
+  geom_violin(aes(fill = "orange")) +
     stat_summary(fun = "median", color = "blue") +
     labs(
     title = "NY snowfall distributions by year from 1981 to 2010",
